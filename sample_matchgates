@@ -1,9 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import qiskit.quantum_info as qi
-from qiskit.quantum_info import random_clifford
-
 
 # required gate definitions:
 # single-qubit Z rotation
@@ -182,7 +179,6 @@ def random_FGUclifford(n):
                      
     # signed permutations
     for i in range(1,2*n+1):
-        break
         if np.random.randint(2) == 1: # flip sign
             
             if i % 2 == 1: # apply Y to qubit i//2, Z to all subsequent qubits
