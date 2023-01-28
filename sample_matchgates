@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import itertools
+import scipy.special
+import numpy.linalg
 
 # required gate definitions:
 # single-qubit Z rotation
@@ -26,9 +28,6 @@ Y = np.array([[0, -1j],
 # single-qubit identity
 I = np.identity(2, dtype='complex128')
     
-
-
-
 
 def sample_sphere(d):
     """Returns the first component of a random point on a d-dimensional sphere"""
@@ -111,7 +110,7 @@ def random_matchgate(n):
 ########################################################################################
 
 def random_transp(n):
-    """return random permutation, decomposed into nearest-neighbour transpositions"""
+    """returns random permutation, decomposed into nearest-neighbour transpositions"""
     unitary = np.identity(2**n, dtype='complex128')
     
     transp = []
@@ -127,104 +126,165 @@ def random_transp(n):
             transp.append((j-2-k,j-1-k))
     
     return transp
+    
 
-def random_FGUclifford(n):
+def random_FGUclifford(n, ret_unitary = False):
+    """outputs uniformly random 2n*2n signed permutation matrix i.e. matchgate Clifford
+       if ret_unitary is set to True, the n-qubit unitary is returned aswell"""
     
     transp = random_transp(n)
     
-    unitary = np.identity(2**n, dtype='complex128')
+    Q = np.identity(2*n, dtype='float32')[:,(transp-1)]
     
-    for i,j in enumerate(transp):
     
-        if j[0] % 2 == 1: # Z-rotation by pi/2 on qubit j[0]//2, identity on all others
-        
-            if j[0]//2 == 0:
-                gate = Z(np.pi/2)
-                
-                for qubit in range(1,n):
-                    gate = np.kron(gate, I)
-                   
-            else:
-                gate = I
-                
-                for qubit in range(1, n):
-                        if qubit == j[0]//2:
-                            gate = np.kron(gate, Z(np.pi/2))
-                            
-                        else:
-                            gate = np.kron(gate, I)
-            
-        else: # XX-rotation by pi/2 on qubits j[0]//2-1 and j[0]//2, identity on all others
+    if ret_unitary == True:
+    
+    	unitary = np.identity(2**n, dtype='complex128')
+    	
+    	for i,j in enumerate(transp):
 
-            if j[0]//2 - 1 == 0:
-                gate = XX(np.pi/2)
-                
-                for qubit in range(2,n):
-                    gate = np.kron(gate,I)
-                   
-            else:
-                gate = I
-                
-                for qubit in range(1, n):
-                        if qubit == j[0]//2 - 1:
-                            gate = np.kron(gate, XX(np.pi/2))
-                            
-                        elif qubit == j[0]//2:
-                            continue
-                            
-                        else:
-                            gate = np.kron(gate, I)                            
+		    if j[0] % 2 == 1: # Z-rotation by pi/2 on qubit j[0]//2, identity on all others
+		    
+		        if j[0]//2 == 0:
+		            gate = Z(np.pi/2)
+		            
+		            for qubit in range(1,n):
+		                gate = np.kron(gate, I)
+		               
+		        else:
+		            gate = I
+		            
+		            for qubit in range(1, n):
+		                    if qubit == j[0]//2:
+		                        gate = np.kron(gate, Z(np.pi/2))
+		                        
+		                    else:
+		                        gate = np.kron(gate, I)
+		        
+		    else: # XX-rotation by pi/2 on qubits j[0]//2-1 and j[0]//2, identity on all others
 
-        unitary = gate @ unitary
+		        if j[0]//2 - 1 == 0:
+		            gate = XX(np.pi/2)
+		            
+		            for qubit in range(2,n):
+		                gate = np.kron(gate,I)
+		               
+		        else:
+		            gate = I
+		            
+		            for qubit in range(1, n):
+		                    if qubit == j[0]//2 - 1:
+		                        gate = np.kron(gate, XX(np.pi/2))
+		                        
+		                    elif qubit == j[0]//2:
+		                        continue
+		                        
+		                    else:
+		                        gate = np.kron(gate, I)                            
+
+		    unitary = gate @ unitary
                      
     # signed permutations
     for i in range(1,2*n+1):
         if np.random.randint(2) == 1: # flip sign
+        
+            Q[i-1,:] *= (-1)
             
-            if i % 2 == 1: # apply Y to qubit i//2, Z to all subsequent qubits
-                
-                if i//2 == 0:
-                    gate = Y
+            if ret_unitary == True:
+            
+                if i % 2 == 1: # apply Y to qubit i//2, Z to all subsequent qubits
                     
-                    for qubit in range(1,n):
-                        gate = np.kron(gate, Z(np.pi))
-                
-                else:
-                    gate = I
+                    if i//2 == 0:
+                        gate = Y
+                        
+                        for qubit in range(1,n):
+                            gate = np.kron(gate, Z(np.pi))
                     
-                    for qubit in range(1,i//2):
-                            gate = np.kron(gate, I)
+                    else:
+                        gate = I
+                        
+                        for qubit in range(1,i//2):
+                                gate = np.kron(gate, I)
+                        
+                        gate = np.kron(gate, Y)
+                        
+                        for qubit in range(i//2+1,n):
+                            gate = np.kron(gate, Z(np.pi))
+                  
                     
-                    gate = np.kron(gate, Y)
-                    
-                    for qubit in range(i//2+1,n):
-                        gate = np.kron(gate, Z(np.pi))
-              
-                
 
-            else: # apply X to qubit i//2-1, Z to all subsequent qubits
-                
-                if i//2 - 1 == 0:
-                    gate = X
+                else: # apply X to qubit i//2-1, Z to all subsequent qubits
                     
-                    for qubit in range(1,n):
-                        gate = np.kron(gate, Z(np.pi))
-                
-                else:
-                    gate = I
+                    if i//2 - 1 == 0:
+                        gate = X
+                        
+                        for qubit in range(1,n):
+                            gate = np.kron(gate, Z(np.pi))
                     
-                    for qubit in range(1,i//2-1):
-                        gate = np.kron(gate, I)
-                    
-                    gate = np.kron(gate, X)
-                    
-                    for qubit in range(i//2,n):
-                        gate = np.kron(gate, Z(np.pi))
-                    
-            unitary = gate @ unitary
-            
-    return unitary
+                    else:
+                        gate = I
+                        
+                        for qubit in range(1,i//2-1):
+                            gate = np.kron(gate, I)
+                        
+                        gate = np.kron(gate, X)
+                        
+                        for qubit in range(i//2,n):
+                            gate = np.kron(gate, Z(np.pi))
+                        
+                unitary = gate @ unitary
     
+    if ret_unitary == True:
+        return unitary, Q   
+        
+    return Q
+
+
+def subsets(n,k):
+    """returns all subsets of {1,...,n} of size k"""
+    
+    return np.array(list(itertools.combinations(np.arange(1,n+1), r)))
+  
+#def HS(X,Y):
+#    """Hilbert-Schmidt inner product"""
+#    
+#    return np.trace(np.matmul(np.conj(X).T,Y))
+
+def get_f_2k(k,n,Q,b):
+    """returns single-round estimator for f_2k, given measurement outcome b (a bit string) and matchgate Q"""
+    
+    sets = subsets(n,k)
+    estimate = 0
+    
+    for S in sets:
+        for Sp in sets:
+            estimate += 1/2**n*1/(scipy.special.binom(n,k))*(-1)**(k+np.dot(b,Sp))*np.conj(np.linalg.det(Q[S-1,Sp-1]))
+            
+    return estimate
+    
+    
+def estimate(n,f_arr,Q,b,S):
+    """returns single-round estimator for (-i)**(|S|/2)*gamma_S, given classical shadow (Q,b) and array of calibration parameters f_arr
+       It is not a problem to extend the function to compute expectation values of arbitrary observables, but this is a relevant special case (also computationally efficient)"""
+   
+    if len(S)%2==1:
+        return 0
+    
+    estimate = 0
+        
+    k = len(S)//2
+    sets = subsets(n,k)
+        
+    for Sp in sets:
+        estimate += 1/2**n*(-1)**(np.dot(b,Sp))*np.conj(np.linalg.det(Q[S-1,Sp-1]))
+        
+    return (1j)**k*(estimate)/f_arr[k] 
+    
+        
+    
+
+#n = 8
+#A = random_FGUclifford(n)
 
 
 ########################################################################################
