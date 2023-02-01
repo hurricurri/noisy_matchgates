@@ -110,38 +110,40 @@ def random_matchgate(n):
 ########################################################################################
 
 def random_transp(n):
-    """returns random permutation, decomposed into nearest-neighbour transpositions"""
-    unitary = np.identity(2**n, dtype='complex128')
+    """returns a random permutation of [1,...,n] as an array, and also nn_transp, which is a decomposition into nearest-neighbour transpositions"""
     
-    transp = []
+    transp = np.arange(1,n+1, dtype='int')
+    nn_transp = []
     
     # Fisher–Yates shuffle
     for i in range(1,n):
         j = np.random.randint(i,n+1)
         
+        transp[i-1] = j
+        transp[j-1] = i
+        
         for k in range(j-i):
-            transp.append((i+k,i+k+1))
+            nn_transp.append((i+k,i+k+1))
         
         for k in range(j-i-1):
-            transp.append((j-2-k,j-1-k))
+            nn_transp.append((j-2-k,j-1-k))
     
-    return transp
+    return transp, nn_transp
     
 
 def random_FGUclifford(n, ret_unitary = False):
     """outputs uniformly random 2n*2n signed permutation matrix i.e. matchgate Clifford
        if ret_unitary is set to True, the n-qubit unitary is returned aswell"""
     
-    transp = random_transp(n)
+    transp, nn_transp = np.array(random_transp(2*n))
     
-    Q = np.identity(2*n, dtype='float32')[:,(transp-1)]
-    
-    
+    Q = np.identity(2*n, dtype='float32')[:,transp-1]
+
     if ret_unitary == True:
     
     	unitary = np.identity(2**n, dtype='complex128')
     	
-    	for i,j in enumerate(transp):
+    	for i,j in enumerate(nn_transp):
 
 		    if j[0] % 2 == 1: # Z-rotation by pi/2 on qubit j[0]//2, identity on all others
 		    
@@ -187,7 +189,7 @@ def random_FGUclifford(n, ret_unitary = False):
     # signed permutations
     for i in range(1,2*n+1):
         if np.random.randint(2) == 1: # flip sign
-        
+            
             Q[i-1,:] *= (-1)
             
             if ret_unitary == True:
@@ -235,20 +237,20 @@ def random_FGUclifford(n, ret_unitary = False):
                 unitary = gate @ unitary
     
     if ret_unitary == True:
-        return unitary, Q   
+        return Q, unitary   
         
     return Q
 
 
 def subsets(n,k):
     """returns all subsets of {1,...,n} of size k"""
-    
-    return np.array(list(itertools.combinations(np.arange(1,n+1), r)))
+    return list(itertools.combinations(np.arange(1,n+1), k))
   
 #def HS(X,Y):
 #    """Hilbert-Schmidt inner product"""
 #    
 #    return np.trace(np.matmul(np.conj(X).T,Y))
+ 
 
 def get_f_2k(k,n,Q,b):
     """returns single-round estimator for f_2k, given measurement outcome b (a bit string) and matchgate Q"""
@@ -258,33 +260,36 @@ def get_f_2k(k,n,Q,b):
     
     for S in sets:
         for Sp in sets:
-            estimate += 1/2**n*1/(scipy.special.binom(n,k))*(-1)**(k+np.dot(b,Sp))*np.conj(np.linalg.det(Q[S-1,Sp-1]))
+            estimate += 1/2**n*1/(scipy.special.binom(n,k))*(-1)**(k+np.sum(b[np.asarray(Sp)-1]))*np.conj(np.linalg.det(Q[np.ix_(np.asarray(S)-1,np.asarray(Sp)-1)]))
             
     return estimate
     
-    
+
 def estimate(n,f_arr,Q,b,S):
-    """returns single-round estimator for (-i)**(|S|/2)*gamma_S, given classical shadow (Q,b) and array of calibration parameters f_arr
+    """returns single-round estimator for (-i)**(|S|/2)*gamma_S, given classical shadow (Q,b) and array of calibration parameters f_arr,
        It is not a problem to extend the function to compute expectation values of arbitrary observables, but this is a relevant special case (also computationally efficient)"""
    
     if len(S)%2==1:
         return 0
-    
-    estimate = 0
         
     k = len(S)//2
     sets = subsets(n,k)
-        
-    for Sp in sets:
-        estimate += 1/2**n*(-1)**(np.dot(b,Sp))*np.conj(np.linalg.det(Q[S-1,Sp-1]))
-        
-    return (1j)**k*(estimate)/f_arr[k] 
+
+    estimate = 0
     
+    for Sp in sets:
+        Sp_complete = np.array([(2*i-1,2*i) for i in Sp]).flatten()
+
+        estimate += 1/2**n*(-1)**(np.sum(b[np.asarray(Sp)-1]))*np.conj(np.linalg.det(Q[np.ix_(np.asarray(S)-1,np.asarray(Sp_complete)-1)]))
         
+    return (-1j)**k*(estimate)/f_arr[k] 
     
 
-#n = 8
-#A = random_FGUclifford(n)
+
+Q=random_FGUclifford(4)
+
+#print(estimate(3,np.array([0.5,0.5,0.5]),Q,np.array([1,1,1]),np.array([1,3])))
+
 
 
 ########################################################################################
