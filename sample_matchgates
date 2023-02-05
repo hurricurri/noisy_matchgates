@@ -119,9 +119,11 @@ def random_transp(n):
     for i in range(1,n):
         j = np.random.randint(i,n+1)
         
-        transp[i-1] = j
-        transp[j-1] = i
+        mem = transp[i-1]
         
+        transp[i-1] = transp[j-1]
+        transp[j-1] = mem
+
         for k in range(j-i):
             nn_transp.append((i+k,i+k+1))
         
@@ -129,16 +131,16 @@ def random_transp(n):
             nn_transp.append((j-2-k,j-1-k))
     
     return transp, nn_transp
-    
+
 
 def random_FGUclifford(n, ret_unitary = False):
     """outputs uniformly random 2n*2n signed permutation matrix i.e. matchgate Clifford
        if ret_unitary is set to True, the n-qubit unitary is returned aswell"""
     
     transp, nn_transp = np.array(random_transp(2*n))
-    
+    #print(transp)
     Q = np.identity(2*n, dtype='float32')[:,transp-1]
-
+    #print(Q)
     if ret_unitary == True:
     
     	unitary = np.identity(2**n, dtype='complex128')
@@ -285,10 +287,12 @@ def estimate(n,f_arr,Q,b,S):
     return (-1j)**k*(estimate)/f_arr[k] 
     
 
+#for i in range(10):
 
-Q=random_FGUclifford(4)
+#Q=random_FGUclifford(4)
+#    print(Q)
 
-#print(estimate(3,np.array([0.5,0.5,0.5]),Q,np.array([1,1,1]),np.array([1,3])))
+#print(estimate(4,np.array([0.5,0.5,1,1]),Q,np.array([0,1,0,1]),np.array([1,2])))
 
 
 
