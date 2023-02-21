@@ -36,17 +36,18 @@ def matching_sites(b,S):
     
     else: 
         return np.sum(b[S])
-    
 
-def run_experiment(n, S, noise_channel, p, no_samples, no_trials):
-
-	# define Gaussian state
+def gaussian_state(n):
+    """output Gaussian state"""
 	
     purestate = pure_initial(n)
     covar = generate_covariance(n)
     c, a = fermionic_operators(n)
     gaussianstate = gaussian_density_matrix(covar, c, a)
     
+    return gaussianstate
+
+def run_experiment(n, gaussianstate, S, noise_channel, p, no_samples, no_trials):    
     
     # callibration procedure
     
@@ -137,12 +138,7 @@ def estimate(n,f_arr,Q,b,S):
     return (estimate)/f_arr[k] #(-1j)**k*(estimate)/f_arr[k] 
     
    
-def true_val(n,S):
- 
-    purestate = pure_initial(n)
-    covar = generate_covariance(n)
-    c, a = fermionic_operators(n)
-    gaussianstate = gaussian_density_matrix(covar, c, a)
+def true_val(n,gaussianstate, S):
     
     O = np.identity(2**n, dtype='complex128')
     
@@ -181,15 +177,16 @@ def true_val(n,S):
 
 
     
-n = 3
-S = [1,2]
-noise_channel = "depolarizing"
-p = 0
-no_samples = 1000
-no_trials = 2
+#n = 3
+#S = [1,2]
+#noise_channel = "depolarizing"
+#p = 0
+#no_samples = 1000
+#no_trials = 5
+#gaussianstate = gaussian_state(n)
 
-#print(run_experiment(n, S, noise_channel, p, no_samples, no_trials))
-true_val(n, S)
+#print(run_experiment(n,gaussianstate, S, noise_channel, p, no_samples, no_trials))
+#print(true_val(n, gaussianstate, S))
 
 
 
