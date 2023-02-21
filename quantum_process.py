@@ -1,10 +1,6 @@
 import numpy as np 
-from sample_matchgates import random_FGUclifford
 from noise_channels import global_depolarizing_channel, amplitude_damping, X_bit_flip, global_x_rotation
-from fermionic_states import pure_initial, gaussian_density_matrix, fermionic_operators, generate_covariance
-from sample_matchgates import random_transp, X, I, Z, XX, get_f_2k, estimate, subsets
 import random
-import math as mt
 
 def list_to_array(lst):
     return np.array(lst)
@@ -60,11 +56,11 @@ def quantum_process(rho, U, n, p, angle, noisechannel):
 #covar = generate_covariance(n)
 #c, a = fermionic_operators(n)
 #gaussianstate = gaussian_density_matrix(covar, c, a)
-#U = random_FGUclifford(n)
+#U = random_FGUclifford(n,ret_unitary=True)[1]
 #p=0.1
-
-#bitstring, b, Q = calibration_process(gaussianstate, U, n, p, False, 'amplitude damping')
-
-#bits, bgaus, Q = calibration_process(purestate, U, n, p, False, 'amplitude damping')
-
-#print('b array for pure state:', b, Q)
+#
+#b = quantum_process(gaussianstate, U, n, p, False, 'amplitude damping')
+#
+#b = quantum_process(purestate, U, n, p, False, 'amplitude damping')
+#
+#print('b array for pure state:', b)

@@ -1,7 +1,4 @@
 import numpy as np
-import numpy as np
-import scipy.linalg
-
 
 ##Create initial states
 

@@ -1,5 +1,4 @@
 import numpy as np 
-import math as mt 
 import random
 from sample_matchgates import X, I 
 
