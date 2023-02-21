@@ -56,15 +56,15 @@ def gaussian_density_matrix(covariance, creation, annihilation):
 
     psi = np.exp(-0.5 * np.dot(a, a))
 
-    rho = np.identity(2**n) * psi
+    rho = np.identity(2**n, dtype='complex128') * psi
     
 
     ##Jordan-Wigner mapping
     for i in range(n):
 
-        X = np.identity(2**n)
+        X = np.identity(2**n, dtype='complex128')
 
-        Z = np.identity(2**n)
+        Z = np.identity(2**n, dtype='complex128')
 
         X[::2**(i+1), ::2**(i+1)] = 0
 
@@ -77,7 +77,9 @@ def gaussian_density_matrix(covariance, creation, annihilation):
             X[2**j::2**(i+1), 2**j::2**(i+1)] *= -1
 
         rho = (X @ rho @ X.conj().T) + (Z @ rho @ Z.conj().T)
-
+        
+        rho = rho/np.trace(rho) #normalize
+        
     return rho
 
 ##Majorana operators state 
