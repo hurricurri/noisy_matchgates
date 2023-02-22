@@ -1,4 +1,5 @@
 import numpy as np
+import numpy.linalg as linalg
 import itertools
 import scipy.special
 import matplotlib.pyplot as plt
@@ -39,7 +40,7 @@ def matching_sites(b,S):
 
 def gaussian_state(n):
     """output Gaussian state"""
-	
+
     purestate = pure_initial(n)
     covar = generate_covariance(n)
     c, a = fermionic_operators(n)
@@ -50,13 +51,16 @@ def gaussian_state(n):
 def run_experiment(n, gaussianstate, S, noise_channel, p, no_samples, no_trials):    
     
     # callibration procedure
+    print("callibration procedure")
     
     f_arr = []
     
     for k in range(0,n+1):
-    	# fix callibration parameter f_2k
-    	
-    	# median of means
+        # fix callibration parameter f_2k
+        
+        print("parameter " + str(2*k))
+        
+        # median of means
         estimates = np.zeros(no_trials)
         
         for trial in range(no_trials):
@@ -73,9 +77,10 @@ def run_experiment(n, gaussianstate, S, noise_channel, p, no_samples, no_trials)
             estimates[trial] = est
  
         f_arr.append(np.median(estimates))
-	
-	# estimation procedure
-	
+    
+    # estimation procedure
+    print("estimation procedure")
+    
     estimates = np.zeros(no_trials)
     
     for trial in range(no_trials):
@@ -94,8 +99,6 @@ def run_experiment(n, gaussianstate, S, noise_channel, p, no_samples, no_trials)
     return np.mean(estimates), f_arr
 
 
-
-
 def get_f_2k(k,n,Q,b):
     """returns single-round estimator for f_2k, given measurement outcome b (an array) and matchgate Q"""
     
@@ -109,7 +112,9 @@ def get_f_2k(k,n,Q,b):
             m = matching_sites(b, ind(Sp))
             
             estimate += 1/2**n*1/(scipy.special.binom(n,k))*(-1)**(k+m)*np.linalg.det(Q[np.ix_(ind(S), ind(Sp))])
-            
+    
+    #print(estimate)
+    
     return estimate
     
 
@@ -135,13 +140,22 @@ def estimate(n,f_arr,Q,b,S):
 
         estimate += 1/2**n*(-1)**(m)*np.linalg.det(Q[np.ix_(ind(S),ind(Sp_complete))])
         
-    return (estimate)/f_arr[k] #(-1j)**k*(estimate)/f_arr[k] 
+    return (-1)**k*(estimate)/f_arr[k]
     
    
-def true_val(n,gaussianstate, S):
+def true_val(n,gaussianstate,S):
     
+    O = majorana_op(n,S)
+    
+    return HS(gaussianstate, O)
+
+
+def majorana_op(n,S):
     O = np.identity(2**n, dtype='complex128')
     
+    if S == [0]:
+        return O
+     
     for s in S:
         
         if (s-1)//2 == 0:
@@ -159,7 +173,7 @@ def true_val(n,gaussianstate, S):
             
             op = Z
             
-            for qubit in range(1, s//2):
+            for qubit in range(1, (s-1)//2):
                 op = np.kron(op, Z)
             
             if s%2==0:
@@ -172,21 +186,50 @@ def true_val(n,gaussianstate, S):
             
             
         O = O @ op
-        
-    return HS(gaussianstate, O)
-
-
     
-#n = 3
-#S = [1,2]
-#noise_channel = "depolarizing"
-#p = 0
-#no_samples = 1000
-#no_trials = 5
-#gaussianstate = gaussian_state(n)
+    return O
 
-#print(run_experiment(n,gaussianstate, S, noise_channel, p, no_samples, no_trials))
-#print(true_val(n, gaussianstate, S))
+
+n = 2
+S = [1,2]
+noise_channel = "depolarizing"
+p = 0
+no_samples_arr = [500,1000,2000,3000]
+est_arr = []
+no_trials = 15
+gaussianstate = gaussian_state(n)
+#gaussianstate = np.zeros((2**n,2**n),dtype= "complex128")
+#gaussianstate[0,0] = 1
+#print(np.trace(gaussianstate))
+#print(np.allclose(gaussianstate, np.conj(gaussianstate).T, rtol=1e-05, atol=1e-08))
+#print(linalg.eig(gaussianstate)[0])
+
+#print(majorana_op(2,[1]))
+#print(majorana_op(2,[2]))
+#print(majorana_op(2,[3]))
+#print(majorana_op(2,[4]))
+
+#Q, U = random_FGUclifford(n,ret_unitary = True)
+#print(Q)
+#print("#######################################")
+#print(np.conj(U).T @ majorana_op(n,[0]) @ U)
+#print("#######################################")
+#print(np.conj(U).T @ majorana_op(n,[1]) @ U)
+#print("#######################################")
+#print(np.conj(U).T @ majorana_op(n,[2]) @ U)
+#print("#######################################")
+#print(np.conj(U).T @ majorana_op(n,[3]) @ U)
+#print("#######################################")
+#print(np.conj(U).T @ majorana_op(n,[4]) @ U)
+
+#print(np.allclose(np.eye(U.shape[0]), np.matmul(np.conj(U).T, U)))
+
+#for i, no_samples in enumerate(no_samples_arr):
+#    print("no_samples = " + str(no_samples))
+#    est_arr.append(run_experiment(n,gaussianstate,S,noise_channel,p,no_samples,no_trials)[0])
+
+#plt.plot(no_samples_arr, est_arr, "o")
+#plt.show()
 
 
 
