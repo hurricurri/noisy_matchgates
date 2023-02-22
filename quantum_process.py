@@ -41,8 +41,8 @@ def quantum_process(rho, U, n, p, angle, noisechannel):
     
     probabilities = probabilities/np.sum(probabilities)
 
-    outputs = [random.choices([0, 1], weights = [1 - p, p])[0] for p in probabilities]
-
+    bitstrings = list(itertools.product([0, 1], repeat=n))
+    outputs = random.choices(bitstrings, weights = probabilities)[0]
     barray = list_to_array(outputs)
     
     return barray
