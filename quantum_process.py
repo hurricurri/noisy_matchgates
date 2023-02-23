@@ -1,4 +1,5 @@
 import numpy as np 
+import itertools
 from noise_channels import global_depolarizing_channel, amplitude_damping, X_bit_flip, global_x_rotation
 import random
 
@@ -34,15 +35,15 @@ def quantum_process(rho, U, n, p, angle, noisechannel):
         rho = rho
 
 
-    ##measure in the computational basis 
-    diag = np.diag(rho) 
+    ##measure in the computational basis
+    probabilities = np.abs(np.diag(rho))
+    probabilities = probabilities /np.sum(probabilities)
 
-    probabilities = np.abs(diag)**2
     
-    probabilities = probabilities/np.sum(probabilities)
-
     bitstrings = list(itertools.product([0, 1], repeat=n))
+    
     outputs = random.choices(bitstrings, weights = probabilities)[0]
+
     barray = list_to_array(outputs)
     
     return barray
