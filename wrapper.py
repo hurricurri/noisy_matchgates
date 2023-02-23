@@ -48,12 +48,16 @@ def gaussian_state(n):
     
     return gaussianstate
 
-def run_experiment(n, gaussianstate, S, noise_channel, p, no_samples, no_trials):    
+def run_experiment(n, state, S, noise_channel, p, no_samples, no_trials):    
     
     # callibration procedure
     print("callibration procedure")
     
     f_arr = []
+    
+    # initial state for callibration procedure
+    all_zeros = np.zeros((2**n,2**n),dtype= "complex128")
+    all_zeros[0,0] = 1
     
     for k in range(0,n+1):
         # fix callibration parameter f_2k
@@ -70,7 +74,8 @@ def run_experiment(n, gaussianstate, S, noise_channel, p, no_samples, no_trials)
             for sample in range(no_samples):
             
                 Q, U = random_FGUclifford(n, ret_unitary=True)
-                b = quantum_process(gaussianstate, U, n, p, False, noise_channel)
+
+                b = quantum_process(all_zeros, U, n, p, False, noise_channel)
                 est += get_f_2k(k,n,Q,b)
 
             est /= no_samples
@@ -90,7 +95,8 @@ def run_experiment(n, gaussianstate, S, noise_channel, p, no_samples, no_trials)
         for sample in range(no_samples):
         
             Q, U = random_FGUclifford(n, ret_unitary=True)
-            b = quantum_process(gaussianstate, U, n, p, False, noise_channel)
+            b = quantum_process(state, U, n, p, False, noise_channel)
+            
             est += estimate(n,f_arr,Q,b,S)
                 
         est /= no_samples
@@ -143,11 +149,11 @@ def estimate(n,f_arr,Q,b,S):
     return (-1)**k*(estimate)/f_arr[k]
     
    
-def true_val(n,gaussianstate,S):
+def true_val(n,state,S):
     
     O = majorana_op(n,S)
     
-    return HS(gaussianstate, O)
+    return HS(state, O)
 
 
 def majorana_op(n,S):
@@ -191,18 +197,21 @@ def majorana_op(n,S):
 
 
 n = 2
-S = [1,2]
+S = [1,2,3,4]
 noise_channel = "depolarizing"
 p = 0
-no_samples_arr = [500,1000,2000,3000]
-est_arr = []
-no_trials = 15
-gaussianstate = gaussian_state(n)
-#gaussianstate = np.zeros((2**n,2**n),dtype= "complex128")
-#gaussianstate[0,0] = 1
-#print(np.trace(gaussianstate))
-#print(np.allclose(gaussianstate, np.conj(gaussianstate).T, rtol=1e-05, atol=1e-08))
-#print(linalg.eig(gaussianstate)[0])
+#no_samples_arr = [100000]
+no_samples = 1000
+#est_arr = []
+no_trials = 5
+
+state = gaussian_state(n)
+print(run_experiment(n,state,S,noise_channel,p,no_samples,no_trials))
+
+
+#print(np.trace(state))
+#print(np.allclose(state, np.conj(state).T, rtol=1e-05, atol=1e-08))
+#print(linalg.eig(state)[0])
 
 #print(majorana_op(2,[1]))
 #print(majorana_op(2,[2]))
@@ -225,11 +234,19 @@ gaussianstate = gaussian_state(n)
 #print(np.allclose(np.eye(U.shape[0]), np.matmul(np.conj(U).T, U)))
 
 #for i, no_samples in enumerate(no_samples_arr):
-#    print("no_samples = " + str(no_samples))
-#    est_arr.append(run_experiment(n,gaussianstate,S,noise_channel,p,no_samples,no_trials)[0])
+#    print(run_experiment(n,state,S,noise_channel,p,no_samples,no_trials))
+    #print("no_samples = " + str(no_samples))
+    #est_arr.append(run_experiment(n,state,S,noise_channel,p,no_samples,no_trials)[0])
 
+#print(true_val(n, state,S))
 #plt.plot(no_samples_arr, est_arr, "o")
 #plt.show()
 
-
+#pot = 0
+#k = 100000
+#t = 2
+#for i in range(k):
+#    Q, U = random_FGUclifford(n,ret_unitary = True)
+#    pot += 1/k*np.abs(np.trace(U))**(2*t)
+#print(pot)
 
