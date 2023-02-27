@@ -49,7 +49,6 @@ def random_transp(n):
             nn_transp.append((j-2-k,j-1-k))
     
     transp = (np.argsort(transp)+1)
-    
     return transp, nn_transp
 
 
@@ -68,106 +67,66 @@ def random_FGUclifford(n, ret_unitary = False):
 
             if j[0] % 2 == 1: # Z-rotation by pi/2 on qubit j[0]//2, identity on all others (up to sign)
     
-                if j[0]//2 == 0:
-                    gate = Z(np.pi/2)
-                    
+                if j[0] == 1:
+                
+                    gate = Y @ (Z(np.pi/2))
+
                     for qubit in range(1,n):
-                        gate = np.kron(gate, I)
+                        gate = np.kron(gate, Z(np.pi))
                        
                 else:
                     gate = I
                     
-                    for qubit in range(1, n):
-                            if qubit == j[0]//2:
-                                gate = np.kron(gate, Z(np.pi/2))
-                                
-                            else:
-                                gate = np.kron(gate, I)
-                
-                unitary = gate @ unitary
-                
-                # correct sign (for post-processing purposes)
-                # apply X to qubit j[1]//2-1, Z to all subsequent qubits
+                    for qubit in range(1, j[0]//2):
+                    	gate = np.kron(gate, I)
                     
-                if j[1]//2 - 1 == 0:
-                    gate = X
-                        
-                    for qubit in range(1,n):
-                        gate = np.kron(gate, Z(np.pi))
+                    gate = np.kron(gate, Y @ (Z(np.pi/2)) )
                     
-                else:
-                    gate = I
-                        
-                    for qubit in range(1,j[1]//2-1):
-                        gate = np.kron(gate, I)
-                        
-                    gate = np.kron(gate, X)
-                        
-                    for qubit in range(j[1]//2,n):
-                        gate = np.kron(gate, Z(np.pi))
-                        
+                    for qubit in range(j[0]//2+1,n):
+                    	gate = np.kron(gate, Z(np.pi))
+ 
                 unitary = gate @ unitary
                 
                 
                 
-            else: # XX-rotation by pi/2 on qubits j[0]//2-1 and j[0]//2, identity on all others (up to sign, but we randomize over all of them afterwards)
+            else: # XX-rotation by pi/2 on qubits j[0]//2-1 and j[0]//2, identity on all others (up to sign)
 
-                if j[0]//2 - 1 == 0:
-                    gate = XX(np.pi/2)
+                if j[0] == 2:
+
+                    gate = np.kron(X,Z(np.pi)) @ XX(np.pi/2)
                     
                     for qubit in range(2,n):
-                        gate = np.kron(gate,I)
+                        gate = np.kron(gate,Z(np.pi))
                        
                 else:
                     gate = I
                     
-                    for qubit in range(1, n):
-                            if qubit == j[0]//2 - 1:
-                                gate = np.kron(gate, XX(np.pi/2))
-                                
-                            elif qubit == j[0]//2:
-                                continue
-                                
-                            else:
-                                gate = np.kron(gate, I)
-                
-                unitary = gate @ unitary
-                
-                # correct sign (for post-processing purposes)
-                # apply Y to qubit j[1]//2, Z to all subsequent qubits
+                    for qubit in range(1, j[0]//2-1):
+                    	gate = np.kron(gate,I)
                     
-                if j[1]//2 == 0:
-                    gate = Y
-                        
-                    for qubit in range(1,n):
-                        gate = np.kron(gate, Z(np.pi))
                     
-                else:
-                    gate = I
-                        
-                    for qubit in range(1,j[1]//2):
-                        gate = np.kron(gate, I)
-                        
-                    gate = np.kron(gate, Y)
-                        
-                    for qubit in range(j[1]//2+1,n):
-                        gate = np.kron(gate, Z(np.pi))
+                    gate = np.kron(gate, np.kron(X,Z(np.pi)) @ (XX(np.pi/2)) )
+                    
+                    for qubit in range(j[0]//2+1,n):
+                    	
+                    	gate = np.kron(gate,Z(np.pi))
                   
-                    
-                    
+                
                 unitary = gate @ unitary
+                
+               
                      
     # signed permutations
     for i in range(1,2*n+1):
         if np.random.randint(2) == 1: # flip sign
             
-            Q[:,i-1] *= (-1)
+            Q[i-1,:] *= (-1)
             
             if ret_unitary == True:
             
                 if i % 2 == 1: # apply Y to qubit i//2, Z to all subsequent qubits
                     
-                    if i//2 == 0:
+                    if i == 1:
                         gate = Y
                         
                         for qubit in range(1,n):
@@ -188,7 +147,7 @@ def random_FGUclifford(n, ret_unitary = False):
 
                 else: # apply X to qubit i//2-1, Z to all subsequent qubits
                     
-                    if i//2 - 1 == 0:
+                    if i == 2:
                         gate = X
                         
                         for qubit in range(1,n):
