@@ -167,7 +167,7 @@ def random_FGUclifford(n, ret_unitary = False):
                 unitary = gate @ unitary
     
     if ret_unitary == True:
-        return Q, np.conj(unitary).T   
+        return Q, unitary   
         
     return Q
 
