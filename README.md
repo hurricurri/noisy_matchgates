@@ -30,7 +30,7 @@ this means that for every quantity that needs to be estimated, no_trials batches
 (numpy array) a 2^n times 2^n density matrix with respect to which one wants to estimate expectation values
 
 ** S0**
-(ordered list of integers) specifies the observable $O$ for which one wants to estimate trace(gamma_S0 state)
+(ordered list of integers) specifies the observable $O$ for which one wants to estimate $tr(\tilde{\gamma}_{S0} state)=tr(U_O^\dagger \gamma_{S0} U_0 state)$
 
 example: for $S0=[1,2]$, $O$ would be $\gamma_1 \gamma_2$
 
@@ -53,7 +53,7 @@ available are:
 example: for depolarizing noise, $p=1$ corresponds to fully depolarizing noise and $p=0$ corresponds to no noise.
 
 ** no_samples_est and no_trials_est**
-(integers) to obtain estimates for $\operatorname{tr}(gamma_S0 state)$, the median of means estimator is used.
+(integers) to obtain estimates for $\operatorname{tr}(\tilde\gamma_S0 state)$, the median of means estimator is used.
 this means that for every quantity that needs to be estimated, no_trials batches of no_samples single-shot estimates are obtained and the median of means is computed.
 
 
