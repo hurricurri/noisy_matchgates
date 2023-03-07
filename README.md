@@ -6,11 +6,15 @@ the main functions are "run_calibration" and 'run_estimation', which contains ca
 Input:
 ** n **
 (integer) the number of fermionic modes (or qubits, if one considers the Jordan-Wigner mapping)
+
 ** noise_channel**
 (string) specifies which noise channel should be used
+
 ** p**
 (float) the error probability
+
 ** no_samples_cali and no_trials_cali**
+
 (integers) to obtain estimates for the callibration parameters $f_{2k}$, the median of means estimator is used.
 this means that for every quantity that needs to be estimated, no_trials batches of no_samples single-shot estimates are obtained and the median of means is computed.
 
@@ -21,8 +25,10 @@ this means that for every quantity that needs to be estimated, no_trials batches
 
 ** n**
 (integer) the number of fermionic modes (or qubits, if one considers the Jordan-Wigner mapping)
+
 ** state**
 (numpy array) a 2^n times 2^n density matrix with respect to which one wants to estimate expectation values
+
 ** S0**
 (ordered list of integers) specifies the observable $O$ for which one wants to estimate trace(gamma_S0 state)
 
