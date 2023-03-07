@@ -59,6 +59,10 @@ this means that for every quantity that needs to be estimated, no_trials batches
 
 ** outputs (complex number) median of means estimate for $\operatorname{tr}(O \rho)$**
 
+## Verify_gammaS_Q(n,rho,U0,S0)
+***output the ideal value of tr(rho tilde{gamma}_S0)***
+
+
 ## in addition
 
 the function "true_val" can be used to compute the true value of $\operatorname{tr}(O \rho)$. It takes as input the number of modes $n$, the state $\rho$,
