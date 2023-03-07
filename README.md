@@ -11,7 +11,7 @@ Input:
 ### p
 (float) the error probability
 ### no_samples_cali and no_trials_cali
-(integers) to obtain estimates for the callibration parameters $f_{2k}$ and $\operatorname{tr}(O \rho)$, the median of means estimator is used.
+(integers) to obtain estimates for the callibration parameters $f_{2k}$, the median of means estimator is used.
 this means that for every quantity that needs to be estimated, no_trials batches of no_samples single-shot estimates are obtained and the median of means is computed.
 
 Return: f_arr
