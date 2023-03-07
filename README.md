@@ -4,7 +4,7 @@ the main functions are "run_calibration" and 'run_estimation', which contains ca
 
 ## run_calibration(n, noise_channel, p, no_samples_cali, no_trials_cali)
 Input:
-*** n ***
+** n **
 (integer) the number of fermionic modes (or qubits, if one considers the Jordan-Wigner mapping)
 ** noise_channel**
 (string) specifies which noise channel should be used
