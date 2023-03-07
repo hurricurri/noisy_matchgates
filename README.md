@@ -30,7 +30,7 @@ this means that for every quantity that needs to be estimated, no_trials batches
 (numpy array) a 2^n times 2^n density matrix with respect to which one wants to estimate expectation values
 
 ** S0**
-(ordered list of integers) specifies the observable $O$ for which one wants to estimate $tr(\tilde{\gamma}_{S0} state)=tr(U_O^\dagger \gamma_{S0} U_0 state)$
+(ordered list of integers) specifies the observable $O$ for which one wants to estimate $$tr(\tilde{\gamma}_{S0} state)=tr(U_O^\dagger \gamma_{S0} U_0 state)$$
 
 example: for $S0=[1,2]$, $O$ would be $\gamma_1 \gamma_2$
 
